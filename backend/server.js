@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
+const { runScraper } = require('./scheduler/cron');
 
 const app = express();
 app.use(express.json());
@@ -8,6 +9,12 @@ app.use(express.json());
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.error('MongoDB error:', err));
+
+// Manual trigger endpoint for testing
+app.get('/scrape', async (req, res) => {
+  res.json({ message: 'Scrape started' });
+  await runScraper();
+});
 
 app.get('/', (req, res) => res.send('ZeelLeads API running'));
 
