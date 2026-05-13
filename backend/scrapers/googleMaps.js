@@ -1,4 +1,4 @@
-const { chromium } = require('playwright');
+const { chromium } = require("playwright");
 
 async function scrapeGoogleMaps(category, location, limit = 50) {
   const browser = await chromium.launch({ headless: true });
@@ -9,7 +9,7 @@ async function scrapeGoogleMaps(category, location, limit = 50) {
 
   console.log(`Scraping: ${query}`);
 
-  await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 });
+  await page.goto(url, { waitUntil: "domcontentloaded", timeout: 60000 });
   await page.waitForTimeout(4000);
 
   // Scroll to load more results
@@ -32,22 +32,26 @@ async function scrapeGoogleMaps(category, location, limit = 50) {
     const items = document.querySelectorAll('div[role="feed"] > div');
     const leads = [];
 
-    items.forEach(item => {
-      const nameEl = item.querySelector('div.fontHeadlineSmall, div.qBF1Pd');
-      const ratingEl = item.querySelector('span.MW4etd');
-      const reviewEl = item.querySelector('span.UY7F9');
-      const addressEl = item.querySelector('div.W4Efsd:last-child > div.W4Efsd span:last-child');
+    items.forEach((item) => {
+      const nameEl = item.querySelector("div.fontHeadlineSmall, div.qBF1Pd");
+      const ratingEl = item.querySelector("span.MW4etd");
+      const reviewEl = item.querySelector("span.UY7F9");
+      const addressEl = item.querySelector(
+        "div.W4Efsd:last-child > div.W4Efsd span:last-child",
+      );
       const linkEl = item.querySelector('a[href*="/maps/place/"]');
 
-      const name = nameEl ? nameEl.innerText.trim() : '';
+      const name = nameEl ? nameEl.innerText.trim() : "";
       if (!name || name.length < 3) return;
 
       leads.push({
         businessName: name,
         rating: ratingEl ? parseFloat(ratingEl.innerText) : 0,
-        reviewCount: reviewEl ? parseInt(reviewEl.innerText.replace(/[^0-9]/g, '')) : 0,
-        location: addressEl ? addressEl.innerText.trim() : '',
-        mapLink: linkEl ? linkEl.href : '',
+        reviewCount: reviewEl
+          ? parseInt(reviewEl.innerText.replace(/[^0-9]/g, ""))
+          : 0,
+        location: addressEl ? addressEl.innerText.trim() : "",
+        mapLink: linkEl ? linkEl.href : "",
       });
     });
 
@@ -62,26 +66,57 @@ async function scrapeGoogleMaps(category, location, limit = 50) {
     if (!result.mapLink) continue;
 
     try {
-      await page.goto(result.mapLink, { waitUntil: 'domcontentloaded', timeout: 30000 });
+      await page.goto(result.mapLink, {
+        waitUntil: "domcontentloaded",
+        timeout: 30000,
+      });
       await page.waitForTimeout(2500);
 
-      const website = await page.locator('a[data-item-id="authority"]').getAttribute('href').catch(() => '');
-      const phone = await page.locator('button[data-item-id*="phone"]').textContent().catch(() => '');
+      const website = await page
+        .locator('a[data-item-id="authority"]')
+        .getAttribute("href")
+        .catch(() => "");
+      const phone = await page
+        .locator('button[data-item-id*="phone"]')
+        .textContent()
+        .catch(() => "");
 
+      // Try to extract social links from the page
+      const allLinks = await page.evaluate(() => {
+        return Array.from(document.querySelectorAll("a[href]"))
+          .map((a) => a.href)
+          .filter(
+            (href) =>
+              href.includes("instagram.com") ||
+              href.includes("facebook.com") ||
+              href.includes("wa.me") ||
+              href.includes("whatsapp.com"),
+          );
+      });
+
+      const instagram = allLinks.find((l) => l.includes("instagram.com")) || "";
+      const facebook = allLinks.find((l) => l.includes("facebook.com")) || "";
+      const whatsapp =
+        allLinks.find(
+          (l) => l.includes("wa.me") || l.includes("whatsapp.com"),
+        ) || "";
       leads.push({
         ...result,
         category,
         market: location,
-        source: 'Google Maps',
-        leadTemperature: 'cold',
-        website: website || '',
+        source: "Google Maps",
+        leadTemperature: "cold",
+        website: website || "",
         phone: phone.trim(),
         adActivity: false,
-        status: 'new',
+        status: "new",
+        instagram,
+        facebook,
+        whatsapp,
+        email: '',
       });
 
       console.log(`Captured: ${result.businessName}`);
-
     } catch (err) {
       console.error(`Error on ${result.businessName}:`, err.message);
     }

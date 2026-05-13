@@ -19,6 +19,7 @@ export default function App() {
   const [generatingId, setGeneratingId] = useState(null);
   const [copied, setCopied] = useState(false);
   const [notes, setNotes] = useState("");
+  const [contactFields, setContactFields] = useState({ instagram: '', facebook: '', whatsapp: '', email: '' });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -47,6 +48,10 @@ export default function App() {
     if (selectedLead?._id === id) {
       setSelectedLead(prev => ({ ...prev, status }));
     }
+  }
+  async function saveContactFields(id) {
+    await axios.patch(`/leads/${id}/contacts`, contactFields);
+    fetchLeads();
   }
 
   async function saveNotes(id) {
@@ -81,10 +86,16 @@ export default function App() {
   }
 
   function openLead(lead) {
-    setSelectedLead(lead);
-    setGeneratedMessage(lead.generatedMessage || "");
-    setNotes(lead.notes || "");
-  }
+  setSelectedLead(lead);
+  setGeneratedMessage(lead.generatedMessage || "");
+  setNotes(lead.notes || "");
+  setContactFields({
+    instagram: lead.instagram || '',
+    facebook: lead.facebook || '',
+    whatsapp: lead.whatsapp || '',
+    email: lead.email || '',
+  });
+}
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100 flex flex-col">
@@ -267,6 +278,46 @@ export default function App() {
                 ) : (
                   <p className="text-sm text-gray-500">No message generated yet.</p>
                 )}
+              </div>
+              {/* Contact Channels */}
+              <div className="bg-gray-900 rounded-xl p-5 border border-gray-800">
+                <p className="text-sm font-medium text-gray-300 mb-3">Contact Channels</p>
+                <div className="space-y-3">
+                  {[
+                    { key: 'instagram', label: 'Instagram', placeholder: 'https://instagram.com/...' },
+                    { key: 'facebook', label: 'Facebook', placeholder: 'https://facebook.com/...' },
+                    { key: 'whatsapp', label: 'WhatsApp', placeholder: '+237...' },
+                    { key: 'email', label: 'Email', placeholder: 'contact@business.com' },
+                  ].map(({ key, label, placeholder }) => (
+                    <div key={key}>
+                      <p className="text-xs text-gray-500 mb-1">{label}</p>
+                      <div className="flex gap-2">
+                        <input
+                          className="flex-1 bg-gray-800 text-gray-200 text-sm rounded-lg px-3 py-2 border border-gray-700 focus:outline-none"
+                          placeholder={placeholder}
+                          value={contactFields[key] || ''}
+                          onChange={e => setContactFields(prev => ({ ...prev, [key]: e.target.value }))}
+                        />
+                        {selectedLead[key] && (
+                          <a
+                            href={selectedLead[key]}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-xs bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded-lg"
+                          >
+                            Open
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                  <button
+                    onClick={() => saveContactFields(selectedLead._id)}
+                    className="text-xs bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg transition"
+                  >
+                    Save Channels
+                  </button>
+                </div>
               </div>
 
               {/* Notes */}

@@ -89,6 +89,21 @@ router.patch('/:id/notes', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
+// PATCH update contact channels
+router.patch('/:id/contacts', async (req, res) => {
+  try {
+    const { instagram, facebook, whatsapp, email } = req.body;
+    const lead = await Lead.findByIdAndUpdate(
+      req.params.id,
+      { instagram, facebook, whatsapp, email },
+      { new: true }
+    );
+    if (!lead) return res.status(404).json({ success: false, error: 'Lead not found' });
+    res.json({ success: true, data: lead });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
 
 // DELETE lead
 router.delete('/:id', async (req, res) => {
