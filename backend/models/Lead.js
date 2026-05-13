@@ -17,6 +17,7 @@ const LeadSchema = new mongoose.Schema({
   adActivity: { type: Boolean, default: false },
   status: { type: String, enum: ['new', 'reviewed', 'outreach_sent', 'replied', 'converted'], default: 'new' },
   notes: String,
+  generatedMessage: String,
 }, { timestamps: true });
 
 module.exports = mongoose.model('Lead', LeadSchema);
