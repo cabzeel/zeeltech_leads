@@ -48,17 +48,19 @@ Brand: ZeelTech
 ZeelTech's offer: A professional website plus Facebook advertising that brings in more customers.
 
 Rules:
-- Maximum 5 lines
-- Do NOT use generic phrases like "I hope this message finds you well"
-- Reference the business name and category naturally
-- If they have no website, make that the hook
-- If they have a website, focus on Facebook advertising as the next growth step
-- End with a soft call to action inviting them to reply to this message — no calls, no meetings, just a conversation
-- Sound human, not like a template
-- Do not use emojis
-
-Write only the message, nothing else.`;
-
+- Maximum 5 lines — every word must earn its place
+- Open with a warm, specific greeting that references the business name and category naturally — make it feel like you noticed them, not copied them
+- Never use filler phrases: "I hope this message finds you well", "feel free to reach out", "I came across your business", or any variation
+- If they have no website: lead with the cost of invisibility — what they're losing daily by not existing online — then position a website as the solution that compounds over time
+- If they have a website: acknowledge it briefly, then pivot to Facebook advertising as the next multiplier — frame it around reaching more of the right people, not just more people
+- Sell the outcome, not the service — paint a picture of what their business looks like after: more calls, more walk-ins, more trust, more growth
+- Keep the tone warm and peer-level — like someone who genuinely noticed an opportunity for their business, not a vendor pitching a package
+- End with one soft, low-friction call to action: invite them to reply to this message for a quick conversation — no calls, no meetings, no forms
+- The CTA should feel like an open door, not a push
+- Include portfolio link naturally: https://zeeltech-agency.vercel.app — don't introduce it as "my portfolio", let the context carry it
+- No emojis
+- No bullet points in the output
+- Write only the message, nothing else`
   try {
     const response = await axios.post(
       'https://api.groq.com/openai/v1/chat/completions',
